@@ -47,29 +47,37 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation(files("libs/Interweb-release.aar"))
+//    implementation(files("libs/Interweb-release.aar"))
+    implementation("com.xn.ads2:interweb-local:1.0.0")
 
 }
 
-// 发布信息配置（AGP 9.0.0 推荐 afterEvaluate 包裹）
+// 统一的 publishing 配置（合并重复部分，放到 afterEvaluate 中，AGP 9.0+ 推荐）
 afterEvaluate {
     publishing {
         publications {
-            // KTS 中创建 publication 的语法调整
-            create("release", MavenPublication::class) {
-                from(components["release"]) // KTS 中组件引用用 []
+            // 1. 发布本地 AAR 到 Maven 本地仓库
+            create("interwebLocal", MavenPublication::class) {
+                groupId = "com.xn.ads2"
+                artifactId = "interweb-local"
+                version = "1.0.0"
+                artifact(file("libs/Interweb-release.aar"))
+            }
 
-                // 核心发布信息
+            // 2. 发布当前库的 release 版本（仅定义一次，避免重复）
+            create("release", MavenPublication::class) {
+                from(components["release"])
                 groupId = "com.github.xn"
                 artifactId = "ads2_sdk_i"
-                version = "v1.0.1"
+                version = "v1.0.2"
             }
         }
 
-        // 本地仓库配置（KTS 路径写法优化）
+        // 配置发布仓库（合并重复配置，仅定义一次）
         repositories {
+            mavenLocal() // 优先发布到本地 Maven 仓库（供依赖引用）
             maven {
-                url = uri(layout.buildDirectory.dir("repo")) // 推荐写法，兼容多系统
+                url = uri(layout.buildDirectory.dir("repo")) // JitPack 本地仓库
             }
         }
     }
