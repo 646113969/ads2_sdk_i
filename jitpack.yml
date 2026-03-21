@@ -1,0 +1,6 @@
+# jitpack.yml
+jdk:
+  - openjdk17 # 明确指定 JDK 17（和 AGP 9.0.0 匹配）
+install:
+  # 执行发布任务，生成 pom.xml 和 aar 构件（替换原来的 assembleRelease）
+  - ./gradlew :interweb_h:publishToMavenLocal
